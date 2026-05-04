@@ -740,20 +740,14 @@ export default function App() {
 
   // ── API ───────────────────────────────────────────────
   const callClaude = async (system, user, maxTokens=3000) => {
-    const apiKey = import.meta.env.VITE_ANTHROPIC_API_KEY;
-    if(!apiKey) throw new Error("API key missing — restart the dev server after adding .env.local");
-    const res = await fetch("https://api.anthropic.com/v1/messages",{
-      method:"POST", headers:{
-        "Content-Type":"application/json",
-        "x-api-key": apiKey,
-        "anthropic-version":"2023-06-01",
-        "anthropic-dangerous-direct-browser-access":"true",
-      },
-      body:JSON.stringify({model:"claude-sonnet-4-6",max_tokens:maxTokens,system,messages:[{role:"user",content:user}]}),
+    const res = await fetch("/api/generate", {
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({system, user, maxTokens}),
     });
     if(!res.ok) {
       const errBody = await res.json().catch(()=>({}));
-      throw new Error(`API ${res.status}: ${errBody?.error?.message||"unknown error"}`);
+      throw new Error(`API ${res.status}: ${errBody?.error||"unknown error"}`);
     }
     const data = await res.json();
     const raw = data.content.map(b=>b.text||"").join("");
