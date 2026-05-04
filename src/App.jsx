@@ -685,9 +685,87 @@ function PhotoGrid({ count, photos, onChange }) {
   );
 }
 
+// ─── LICENSE GATE ─────────────────────────────────────────────────────────────
+const LICENSE_KEY = "carousel_ai_license";
+
+function LicenseGate({ onUnlocked }) {
+  const [key,     setKey]     = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error,   setError]   = useState("");
+
+  const verify = async () => {
+    if (!key.trim()) { setError("Please enter your license key."); return; }
+    setLoading(true); setError("");
+    try {
+      const res = await fetch("/api/verify-license", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ licenseKey: key.trim() }),
+      });
+      const data = await res.json();
+      if (data.valid) {
+        localStorage.setItem(LICENSE_KEY, key.trim());
+        onUnlocked();
+      } else {
+        setError(data.error || "Invalid license key. Please try again.");
+      }
+    } catch {
+      setError("Could not verify license. Check your connection and try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const C = { bg:"#080808", surface:"#0f0f0f", border:"rgba(255,255,255,0.07)", accent:"#d4a843", dim:"#2a2a2a", text:"#e8e4dc", muted:"#444" };
+
+  return (
+    <div style={{minHeight:"100vh",backgroundColor:C.bg,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"'DM Sans',sans-serif",padding:24}}>
+      <div style={{width:"100%",maxWidth:440,backgroundColor:C.surface,border:`1px solid ${C.border}`,borderRadius:20,padding:40,display:"flex",flexDirection:"column",alignItems:"center",gap:0}}>
+        {/* Logo */}
+        <div style={{fontSize:28,color:C.accent,marginBottom:16}}>◈</div>
+        <h1 style={{fontFamily:"'Syne',sans-serif",fontWeight:900,fontSize:22,color:"#f0e6c8",margin:"0 0 6px",letterSpacing:"-0.02em",textAlign:"center"}}>Carousel AI Studio</h1>
+        <p style={{fontSize:13,color:C.muted,margin:"0 0 32px",textAlign:"center"}}>Enter your Gumroad license key to continue.</p>
+
+        {/* Input */}
+        <div style={{width:"100%",marginBottom:12}}>
+          <input
+            type="text"
+            placeholder="XXXXXXXX-XXXXXXXX-XXXXXXXX-XXXXXXXX"
+            value={key}
+            onChange={e=>{ setKey(e.target.value); setError(""); }}
+            onKeyDown={e=>e.key==="Enter"&&verify()}
+            style={{width:"100%",backgroundColor:C.bg,border:`1px solid ${error?"#ff4d6d":C.dim}`,borderRadius:10,padding:"13px 16px",color:C.text,fontSize:14,outline:"none",boxSizing:"border-box",fontFamily:"'DM Sans',sans-serif",letterSpacing:"0.04em",textAlign:"center"}}
+          />
+        </div>
+
+        {error && (
+          <p style={{fontSize:12,color:"#ff4d6d",margin:"0 0 12px",textAlign:"center"}}>{error}</p>
+        )}
+
+        <button
+          onClick={verify}
+          disabled={loading}
+          style={{width:"100%",padding:"13px",borderRadius:10,backgroundColor:C.accent,color:"#0a0a0a",fontWeight:800,fontSize:15,border:"none",cursor:loading?"not-allowed":"pointer",opacity:loading?0.6:1,fontFamily:"'Syne',sans-serif",letterSpacing:"-0.01em"}}
+        >
+          {loading ? "Verifying…" : "Unlock"}
+        </button>
+
+        <p style={{fontSize:11,color:"#333",margin:"20px 0 0",textAlign:"center"}}>
+          Don't have a license?{" "}
+          <a href="https://tugbachain.gumroad.com/l/carousel-ai-studio" target="_blank" rel="noreferrer" style={{color:C.accent,textDecoration:"none"}}>Get one on Gumroad →</a>
+        </p>
+      </div>
+    </div>
+  );
+}
+
 // ─── APP ──────────────────────────────────────────────────────────────────────
 export default function App() {
+  const [licensed, setLicensed] = useState(!!localStorage.getItem(LICENSE_KEY));
+
   useEffect(()=>{injectFonts();},[]);
+
+  if (!licensed) return <LicenseGate onUnlocked={()=>setLicensed(true)} />;
 
   const [topic,       setTopic]       = useState("");
   const [category,    setCategory]    = useState("Mindset");
