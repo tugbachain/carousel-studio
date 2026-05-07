@@ -752,7 +752,7 @@ function LicenseGate({ onUnlocked }) {
 
         <p style={{fontSize:11,color:"#333",margin:"20px 0 0",textAlign:"center"}}>
           Don't have a license?{" "}
-          <a href="https://tugbachain.gumroad.com/l/carousel-ai-studio" target="_blank" rel="noreferrer" style={{color:C.accent,textDecoration:"none"}}>Get one on Gumroad →</a>
+          <a href="https://tugbaturker.gumroad.com/l/carousel-ai-studio" target="_blank" rel="noreferrer" style={{color:C.accent,textDecoration:"none"}}>Get one on Gumroad →</a>
         </p>
       </div>
     </div>
