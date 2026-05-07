@@ -697,11 +697,21 @@ function LicenseGate({ onUnlocked }) {
     if (!key.trim()) { setError("Please enter your license key."); return; }
     setLoading(true); setError("");
     try {
+      // Owner test key
+      if (key.trim().toUpperCase() === "TUGBA-TEST-2025-CAROUSEL") {
+        localStorage.setItem(LICENSE_KEY, key.trim());
+        onUnlocked();
+        return;
+      }
       const res = await fetch("/api/verify-license", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ licenseKey: key.trim() }),
       });
+      if (!res.ok) {
+        setError("Verification service error. Use your Gumroad key.");
+        return;
+      }
       const data = await res.json();
       if (data.valid) {
         localStorage.setItem(LICENSE_KEY, key.trim());
