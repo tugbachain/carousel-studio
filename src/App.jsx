@@ -771,10 +771,7 @@ function LicenseGate({ onUnlocked }) {
 export default function App() {
   const [licensed, setLicensed] = useState(false);
 
-  useEffect(()=>{injectFonts();},[]);
-
-  if (!licensed) return <LicenseGate onUnlocked={()=>setLicensed(true)} />;
-
+  // ALL hooks must be declared before any conditional return (React rules)
   const [topic,       setTopic]       = useState("");
   const [category,    setCategory]    = useState("Mindset");
   const [hookStyle,   setHookStyle]   = useState("Bold Claim");
@@ -810,6 +807,11 @@ export default function App() {
   const [previewIdx,  setPreviewIdx]  = useState(0);
 
   const slideRefs = useRef([]);
+
+  useEffect(()=>{injectFonts();},[]);
+
+  // Conditional render — AFTER all hooks (React rules require this)
+  if (!licensed) return <LicenseGate onUnlocked={()=>setLicensed(true)} />;
 
   const updatePhoto = useCallback((idxOrBulk, val) => {
     if (idxOrBulk==="_bulk") { setPerSlidePhotos(val); return; }
