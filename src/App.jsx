@@ -761,7 +761,7 @@ function LicenseGate({ onUnlocked }) {
 
 // ─── APP ──────────────────────────────────────────────────────────────────────
 export default function App() {
-  const [licensed, setLicensed] = useState(!!localStorage.getItem(LICENSE_KEY));
+  const [licensed, setLicensed] = useState(false);
 
   useEffect(()=>{injectFonts();},[]);
 
