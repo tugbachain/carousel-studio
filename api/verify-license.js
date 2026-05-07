@@ -8,22 +8,33 @@ export default async function handler(req, res) {
     return res.status(400).json({ valid: false, error: "License key is required" });
   }
 
+  const key = licenseKey.trim().toUpperCase();
+
+  // Test key for development/owner use
+  if (key === "TUGBA-TEST-2025-CAROUSEL") {
+    return res.status(200).json({ valid: true });
+  }
+
   const params = new URLSearchParams({
     product_permalink: "carousel-ai-studio",
     license_key: licenseKey.trim(),
   });
 
-  const upstream = await fetch("https://api.gumroad.com/v2/licenses/verify", {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: params.toString(),
-  });
+  try {
+    const upstream = await fetch("https://api.gumroad.com/v2/licenses/verify", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: params.toString(),
+    });
 
-  const data = await upstream.json();
+    const data = await upstream.json();
 
-  if (data.success) {
-    return res.status(200).json({ valid: true });
+    if (data.success) {
+      return res.status(200).json({ valid: true });
+    }
+
+    return res.status(200).json({ valid: false, error: data.message || "Invalid license key" });
+  } catch {
+    return res.status(500).json({ valid: false, error: "Verification failed. Try again." });
   }
-
-  return res.status(200).json({ valid: false, error: data.message || "Invalid license key" });
 }
