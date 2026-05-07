@@ -711,13 +711,6 @@ function LicenseGate({ onUnlocked }) {
   const [error,     setError]     = useState("");
   const [remember,  setRemember]  = useState(true);
 
-  // Auto-unlock if previously saved
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem(LICENSE_STORAGE_KEY);
-      if (saved) onUnlocked();
-    } catch {}
-  }, []);
 
   const verify = async () => {
     if (!key.trim()) { setError("Please enter your license key."); return; }
@@ -804,10 +797,8 @@ function LicenseGate({ onUnlocked }) {
 }
 
 // ─── APP ──────────────────────────────────────────────────────────────────────
-export default function App() {
-  const [licensed, setLicensed] = useState(false);
-
-  // ALL hooks must be declared before any conditional return (React rules)
+function AppInner() {
+  // All hooks here — no conditional returns above these
   const [topic,       setTopic]       = useState("");
   const [category,    setCategory]    = useState("Mindset");
   const [hookStyle,   setHookStyle]   = useState("Bold Claim");
@@ -846,8 +837,7 @@ export default function App() {
 
   useEffect(()=>{injectFonts();},[]);
 
-  // Conditional render — AFTER all hooks (React rules require this)
-  if (!licensed) return <LicenseGate onUnlocked={()=>setLicensed(true)} />;
+  // No license check here — AppInner only renders when licensed
 
   const updatePhoto = useCallback((idxOrBulk, val) => {
     if (idxOrBulk==="_bulk") { setPerSlidePhotos(val); return; }
@@ -1426,5 +1416,23 @@ JSON only: {"captions":[{"style":"${styles[idx]}","turkish":{"text":"...with #em
       </main>
       <style>{`@keyframes spin{to{transform:rotate(360deg)}}*{scrollbar-width:thin;scrollbar-color:#222 #080808}`}</style>
     </div>
+  );
+}
+
+export default function App() {
+  const [licensed, setLicensed] = useState(false);
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("carousel_ai_v2_license");
+      if (saved) setLicensed(true);
+    } catch {}
+  }, []);
+
+  if (!licensed) return <LicenseGate onUnlocked={() => setLicensed(true)} />;
+  return (
+    <ErrorBoundary>
+      <AppInner />
+    </ErrorBoundary>
   );
 }
