@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 
 const injectFonts = () => {
   if (document.getElementById("cai-gf")) return;
@@ -17,6 +17,23 @@ const loadScript = (src) =>
   });
 
 // Each template: bg, text, accent, font + layout = unique visual structure
+
+class ErrorBoundary extends React.Component {
+  constructor(props) { super(props); this.state = { error: null }; }
+  static getDerivedStateFromError(e) { return { error: e }; }
+  render() {
+    if (this.state.error) return (
+      <div style={{minHeight:"100vh",backgroundColor:"#080808",color:"#ff4d6d",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",fontFamily:"monospace",padding:32,gap:16}}>
+        <div style={{fontSize:32}}>⚠</div>
+        <div style={{fontSize:16,fontWeight:700}}>App Error</div>
+        <div style={{fontSize:12,color:"#ff8888",maxWidth:600,textAlign:"center"}}>{this.state.error.message}</div>
+        <button onClick={()=>window.location.reload()} style={{marginTop:8,padding:"8px 20px",borderRadius:8,backgroundColor:"#d4a843",color:"#000",border:"none",cursor:"pointer",fontWeight:700}}>Reload</button>
+      </div>
+    );
+    return this.props.children;
+  }
+}
+
 const TEMPLATES = {
   // 1. MINIMAL — clean white, hairline rule, uppercase spaced title
   Minimal: {
