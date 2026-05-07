@@ -686,12 +686,21 @@ function PhotoGrid({ count, photos, onChange }) {
 }
 
 // ─── LICENSE GATE ─────────────────────────────────────────────────────────────
-const LICENSE_KEY = "carousel_ai_license";
+const LICENSE_STORAGE_KEY = "carousel_ai_v2_license";
 
 function LicenseGate({ onUnlocked }) {
-  const [key,     setKey]     = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error,   setError]   = useState("");
+  const [key,       setKey]       = useState("");
+  const [loading,   setLoading]   = useState(false);
+  const [error,     setError]     = useState("");
+  const [remember,  setRemember]  = useState(true);
+
+  // Auto-unlock if previously saved
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(LICENSE_STORAGE_KEY);
+      if (saved) onUnlocked();
+    } catch {}
+  }, []);
 
   const verify = async () => {
     if (!key.trim()) { setError("Please enter your license key."); return; }
@@ -699,6 +708,7 @@ function LicenseGate({ onUnlocked }) {
     try {
       // Owner test key
       if (key.trim().toUpperCase() === "TUGBA-TEST-2025-CAROUSEL") {
+        if (remember) localStorage.setItem(LICENSE_STORAGE_KEY, key.trim().toUpperCase());
         onUnlocked();
         return;
       }
@@ -713,6 +723,7 @@ function LicenseGate({ onUnlocked }) {
       }
       const data = await res.json();
       if (data.valid) {
+        if (remember) localStorage.setItem(LICENSE_STORAGE_KEY, key.trim());
         onUnlocked();
       } else {
         setError(data.error || "Invalid license key. Please try again.");
@@ -749,6 +760,14 @@ function LicenseGate({ onUnlocked }) {
         {error && (
           <p style={{fontSize:12,color:"#ff4d6d",margin:"0 0 12px",textAlign:"center"}}>{error}</p>
         )}
+
+        {/* Remember me */}
+        <div style={{width:"100%",display:"flex",alignItems:"center",gap:8,marginBottom:16,cursor:"pointer"}} onClick={()=>setRemember(r=>!r)}>
+          <div style={{width:18,height:18,borderRadius:5,border:`1px solid ${remember?C.accent:"#333"}`,backgroundColor:remember?"rgba(212,168,67,0.15)":"transparent",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,transition:"all 0.15s"}}>
+            {remember && <span style={{color:C.accent,fontSize:12,fontWeight:800,lineHeight:1}}>✓</span>}
+          </div>
+          <span style={{fontSize:12,color:remember?C.accent:"#555",fontFamily:"'DM Sans',sans-serif",userSelect:"none"}}>Remember me on this device</span>
+        </div>
 
         <button
           onClick={verify}
