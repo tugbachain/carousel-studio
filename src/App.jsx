@@ -699,7 +699,6 @@ function LicenseGate({ onUnlocked }) {
     try {
       // Owner test key
       if (key.trim().toUpperCase() === "TUGBA-TEST-2025-CAROUSEL") {
-        localStorage.setItem(LICENSE_KEY, key.trim());
         onUnlocked();
         return;
       }
@@ -714,7 +713,6 @@ function LicenseGate({ onUnlocked }) {
       }
       const data = await res.json();
       if (data.valid) {
-        localStorage.setItem(LICENSE_KEY, key.trim());
         onUnlocked();
       } else {
         setError(data.error || "Invalid license key. Please try again.");
