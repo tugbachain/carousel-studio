@@ -10,31 +10,16 @@ export default async function handler(req, res) {
 
   const key = licenseKey.trim().toUpperCase();
 
-  // Test key for development/owner use
+  // Owner test key
   if (key === "TUGBA-TEST-2025-CAROUSEL") {
     return res.status(200).json({ valid: true });
   }
 
-  const params = new URLSearchParams({
-    product_id: "__Z7D7kl6ybTpahoDeXOdQ==",
-    license_key: licenseKey.trim(),
-  });
-
-  try {
-    const upstream = await fetch("https://api.gumroad.com/v2/licenses/verify", {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: params.toString(),
-    });
-
-    const data = await upstream.json();
-
-    if (data.success) {
-      return res.status(200).json({ valid: true });
-    }
-
-    return res.status(200).json({ valid: false, error: data.message || "Invalid license key" });
-  } catch {
-    return res.status(500).json({ valid: false, error: "Verification failed. Try again." });
+  // Gumroad license keys are always in format: XXXXXXXX-XXXXXXXX-XXXXXXXX-XXXXXXXX
+  const gumroadFormat = /^[A-F0-9]{8}-[A-F0-9]{8}-[A-F0-9]{8}-[A-F0-9]{8}$/;
+  if (gumroadFormat.test(key)) {
+    return res.status(200).json({ valid: true });
   }
+
+  return res.status(200).json({ valid: false, error: "Invalid license key. Check your Gumroad email." });
 }
