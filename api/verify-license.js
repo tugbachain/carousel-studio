@@ -16,7 +16,7 @@ export default async function handler(req, res) {
   }
 
   const params = new URLSearchParams({
-    product_permalink: "carousel-ai-studio",
+    product_id: "__Z7D7kl6ybTpahoDeXOdQ==",
     license_key: licenseKey.trim(),
   });
 
